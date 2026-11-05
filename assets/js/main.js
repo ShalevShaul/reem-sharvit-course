@@ -257,16 +257,30 @@
   /* ---------- FAQ open/close animation ---------- */
 
   function initFaq() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var items = Array.prototype.slice.call(document.querySelectorAll('.faq__item'));
+    var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    document.querySelectorAll('.faq__item').forEach(function (item) {
-      var summary = item.querySelector('summary');
+    // Only one answer stays open: opening an item closes the others.
+    if (reduced) {
+      items.forEach(function (item) {
+        item.addEventListener('toggle', function () {
+          if (!item.open) return;
+          items.forEach(function (other) { if (other !== item) other.open = false; });
+        });
+      });
+      return;
+    }
+
+    var toggles = items.map(function (item) {
       var answer = item.querySelector('.faq__answer');
       var animation = null;
 
-      summary.addEventListener('click', function (e) {
-        e.preventDefault();
-        var opening = !item.open || item.classList.contains('is-closing');
+      function isOpen() {
+        return item.open && !item.classList.contains('is-closing');
+      }
+
+      function setOpen(opening) {
+        if (opening === isOpen()) return;
         // Start from the in-flight height when interrupting a running animation.
         var from = animation ? answer.getBoundingClientRect().height : (opening ? 0 : answer.scrollHeight);
 
@@ -290,9 +304,23 @@
             item.classList.remove('is-closing');
           }
         };
+      }
+
+      return { isOpen: isOpen, setOpen: setOpen };
+    });
+
+    items.forEach(function (item, i) {
+      item.querySelector('summary').addEventListener('click', function (e) {
+        e.preventDefault();
+        var opening = !toggles[i].isOpen();
+        if (opening) {
+          toggles.forEach(function (t, j) { if (j !== i) t.setOpen(false); });
+        }
+        toggles[i].setOpen(opening);
       });
     });
   }
+
 
   /* ---------- Contact form (UI only) ---------- */
 
