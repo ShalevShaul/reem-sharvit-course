@@ -518,7 +518,9 @@ button { font: inherit; color: inherit; }
 
 .chapter__img {
   width: 100%;
-  height: 200px;
+  /* 70% of the photo's natural 2:3 height */
+  height: auto;
+  aspect-ratio: 500 / 525;
   object-fit: cover;
   object-position: 50% 50%;
   margin-block-end: var(--space-4);
@@ -692,6 +694,25 @@ button { font: inherit; color: inherit; }
 }
 @media (hover: hover) {
   .gallery li:hover img { transform: scale(1.03); }
+}
+
+/* Gallery sits above the FAQ on mobile, beside it on desktop. */
+.faq-layout { display: grid; gap: var(--space-6); }
+@media (min-width: 1024px) {
+  .faq-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+  .faq-layout__faq { grid-column: 1; grid-row: 1; }
+  .faq-layout__gallery {
+    grid-column: 2; grid-row: 1;
+    position: sticky;
+    inset-block-start: calc(var(--header-h) + var(--space-4));
+  }
+  .faq-layout .gallery { grid-auto-rows: clamp(80px, min(8.5vw, (100vh - 220px) / 6), 130px); gap: var(--space-2); }
+  .faq-layout .section-head--center { margin-inline: 0; text-align: start; }
+  .faq-layout .faq { max-width: none; }
 }
 
 /* ---------- Next cohort ---------- */
